@@ -35,7 +35,15 @@ function App() {
       setIsLoading(false);
     };
 
-    handleTranslate();
+    if (sourceText) {
+      const delay = setTimeout(() => {
+        handleTranslate();
+      }, 500);
+
+      return () => clearTimeout(delay);
+    } else {
+      setTranslatedText("");
+    }
   }, [sourceText]);
 
   return (
