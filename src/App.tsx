@@ -16,23 +16,32 @@ function App() {
   const [sourceText, setSourceText] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [translatedText, setTranslatedText] = useState("");
+  const [isError, setIsError] = useState(false);
 
   useEffect(() => {
     const handleTranslate = async () => {
       setIsLoading(true);
-      const res = await fetch(
-        `https://api.mymemory.translated.net/get?q=${sourceText}&langpair=${sourceLang}|${targetLang}`,
-      );
+      try {
+        const res = await fetch(
+          `https://api.mymemory.translated.net/get?q=${sourceText}&langpair=${sourceLang}|${targetLang}`,
+        );
 
-      if (!res.ok) {
-        throw new Error(`${res.status}`);
+        if (!res.ok) {
+          throw new Error(`${res.status}`);
+        }
+
+        const data = await res.json();
+
+        setTranslatedText(data.responseData.translatedText);
+
+        if (isError) {
+          setIsError(false);
+        }
+      } catch (error) {
+        setIsError(true);
+      } finally {
+        setIsLoading(false);
       }
-
-      const data = await res.json();
-
-      setTranslatedText(data.responseData.translatedText);
-
-      setIsLoading(false);
     };
 
     if (sourceText) {
@@ -108,6 +117,10 @@ function App() {
               <div className="absolute inset-0 flex items-center justify-center ">
                 {isLoading ? (
                   <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-primary"></div>
+                ) : isError ? (
+                  <div className="p-4 bg-red-100 border-red-400 text-red-700">
+                    Não foi possível traduzir a mensagem.
+                  </div>
                 ) : (
                   <p className="text-lg text-text-color">{translatedText}</p>
                 )}
