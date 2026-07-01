@@ -53,7 +53,14 @@ function App() {
     } else {
       setTranslatedText("");
     }
-  }, [sourceText]);
+  }, [sourceText, targetLang, sourceLang]);
+
+  const swapTranslate = () => {
+    setSourceLang(targetLang);
+    setTargetLang(sourceLang);
+    setSourceText(translatedText);
+    setTranslatedText(sourceText);
+  };
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -80,9 +87,12 @@ function App() {
               ))}
             </select>
 
-            <button className="p-2 rounded-full hover:bg-gray-100 outline-none">
+            <button
+              onClick={swapTranslate}
+              className="p-2 rounded-full hover:bg-gray-100 outline-none cursor-pointer"
+            >
               <svg
-                className="w-4 h-4 text-header-color cursor-pointer"
+                className="w-4 h-4 text-header-color"
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 20 20"
               >
@@ -113,18 +123,20 @@ function App() {
               ></textarea>
             </div>
 
-            <div className="p-4 relative bg-secondary-background border-l border-gray-200">
-              <div className="absolute inset-0 flex items-center justify-center ">
-                {isLoading ? (
+            <div className="p-4 relative bg-secondary-background border-l border-gray-200 ">
+              {isLoading ? (
+                <div className="absolute inset-0 flex items-center justify-center ">
                   <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-primary"></div>
-                ) : isError ? (
-                  <div className="p-4 bg-red-100 border-red-400 text-red-700">
-                    Não foi possível traduzir a mensagem.
-                  </div>
-                ) : (
-                  <p className="text-lg text-text-color">{translatedText}</p>
-                )}
-              </div>
+                </div>
+              ) : isError ? (
+                <div className="p-4 bg-red-100 border-red-400 text-red-700">
+                  Não foi possível traduzir a mensagem.
+                </div>
+              ) : (
+                <p className="text-lg text-text-color text-left">
+                  {translatedText}
+                </p>
+              )}
             </div>
           </div>
         </div>
