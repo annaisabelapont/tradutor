@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./App.css";
 
 const languages = [
@@ -13,6 +13,31 @@ const languages = [
 function App() {
   const [sourceLang, setSourceLang] = useState("pt");
   const [targetLang, setTargetLang] = useState("en");
+  const [sourceText, setSourceText] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [translatedText, setTranslatedText] = useState("");
+
+  useEffect(() => {
+    const handleTranslate = async () => {
+      setIsLoading(true);
+      const res = await fetch(
+        `https://api.mymemory.translated.net/get?q=${sourceText}&langpair=${sourceLang}|${targetLang}`,
+      );
+
+      if (!res.ok) {
+        throw new Error(`${res.status}`);
+      }
+
+      const data = await res.json();
+
+      setTranslatedText(data.responseData.translatedText);
+
+      setIsLoading(false);
+    };
+
+    handleTranslate();
+  }, [sourceText]);
+
   return (
     <div className="min-h-screen flex flex-col">
       <header className="bg-white shadow-sm">
@@ -26,7 +51,11 @@ function App() {
       <main className="grow flex items-start justify-center px-4 py-8 bg-background">
         <div className="w-full max-w-5xl bg-white rounded-lg shadow-md overflow-hidden">
           <div className="flex items-center justify-between p-4 border-b border-gray-200">
-            <select className="text-sm bg-transparent border-none focus:outline-none cursor-pointer">
+            <select
+              value={sourceLang}
+              onChange={(e) => setSourceLang(e.target.value)}
+              className="text-sm bg-transparent border-none focus:outline-none cursor-pointer"
+            >
               {languages.map((lang) => (
                 <option value={lang.code} key={lang.code}>
                   {lang.name}
@@ -44,7 +73,11 @@ function App() {
               </svg>
             </button>
 
-            <select className="text-sm bg-transparent border-none focus:outline-none cursor-pointer">
+            <select
+              value={targetLang}
+              onChange={(e) => setTargetLang(e.target.value)}
+              className="text-sm bg-transparent border-none focus:outline-none cursor-pointer"
+            >
               {languages.map((lang) => (
                 <option value={lang.code} key={lang.code}>
                   {lang.name}
@@ -56,6 +89,8 @@ function App() {
           <div className="grid grid-cols-1 md:grid-cols-2">
             <div className="p-4">
               <textarea
+                value={sourceText}
+                onChange={(e) => setSourceText(e.target.value)}
                 className="w-full h-40 text-lg text-text-color bg-transparent resize-none outline-none"
                 placeholder="Digite seu texto..."
               ></textarea>
@@ -63,11 +98,12 @@ function App() {
 
             <div className="p-4 relative bg-secondary-background border-l border-gray-200">
               <div className="absolute inset-0 flex items-center justify-center ">
-                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-primary"></div>
-
-                <p className="text-lg text-text-color"></p>
+                {isLoading ? (
+                  <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-primary"></div>
+                ) : (
+                  <p className="text-lg text-text-color">{translatedText}</p>
+                )}
               </div>
-              {/* isLoading ? Spinner : fodase */}
             </div>
           </div>
         </div>
